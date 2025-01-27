@@ -33,10 +33,9 @@ app.post("/validate-key", (req, res) => {
     const authHeader = req.headers["authorization"];
     const environment = req.headers["x-environment"];
     const nonce = req.headers["x-nonce"];
-    const timestamp = req.headers["x-timestamp"];
 
     // Validate required headers
-    if (!authHeader || !environment || !nonce || !timestamp) {
+    if (!authHeader || !environment || !nonce) {
       return res.status(400).json({
         valid: false,
         message: "Missing required headers",
@@ -83,18 +82,6 @@ app.post("/validate-key", (req, res) => {
       return res.status(400).json({
         valid: false,
         message: "Environment mismatch",
-      });
-    }
-
-    // Validate timestamp (5-minute window)
-    const requestTime = new Date(timestamp);
-    const currentTime = new Date();
-    const timeDiff = Math.abs(currentTime - requestTime);
-
-    if (isNaN(requestTime.getTime()) || timeDiff > 5 * 60 * 1000) {
-      return res.status(400).json({
-        valid: false,
-        message: "Invalid or expired timestamp",
       });
     }
 
