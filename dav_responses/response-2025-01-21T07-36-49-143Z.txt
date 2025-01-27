@@ -1,0 +1,6 @@
+{
+  "message": "Hello from webhook",
+  "data": {
+    "value": 123
+  }
+}
