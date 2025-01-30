@@ -132,6 +132,56 @@ app.post("/webhook", (req, res) => {
   }
 });
 
+// Endpoint to handle verification status updates
+app.post("/update", (req, res) => {
+  try {
+    // Get headers
+    const apiKey = req.headers["x-API_KEY"];
+
+    if (!apiKey) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing client key",
+      });
+    }
+    // Validate client key
+    if (!validClientKeys.includes(apiKey)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid client key",
+      });
+    }
+
+    // Save the verification update to a file
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const fileName = `verification-update-${timestamp}.json`;
+    const filePath = path.join(responsesDir, fileName);
+
+    const updateData = {
+      ...req.body,
+      timestamp: new Date().toISOString(),
+      apiKey: apikey,
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(updateData, null, 2));
+    console.log(`Verification update saved to: ${filePath}`);
+
+    // Return success response
+    return res.status(200).json({
+      success: true,
+      message: "Verification status updated successfully",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Update verification error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
